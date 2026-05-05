@@ -1,16 +1,36 @@
-from langchain_community.document_loaders import PyPDFDirectoryLoader
+from langchain_community.document_loaders import PyMuPDFLoader, TextLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
+import os
 
 def ingest():
-    # 1. Load all PDFs
-    print("Loading PDFs...")
-    loader = PyPDFDirectoryLoader("data/")
-    docs = loader.load()
-    print(f"Loaded {len(docs)} pages")
+    docs = []
 
-    # 2. Split into chunks
+    # Load PDFs
+    print("Loading PDFs...")
+    for filename in os.listdir("data/"):
+        if filename.endswith(".pdf"):
+            loader = PyMuPDFLoader(f"data/{filename}")
+            docs.extend(loader.load())
+
+    # Load .txt files
+    print("Loading text files...")
+    for filename in os.listdir("data/"):
+        if filename.endswith(".txt"):
+            loader = TextLoader(f"data/{filename}")
+            docs.extend(loader.load())
+
+    # Load .md files
+    print("Loading markdown files...")
+    for filename in os.listdir("data/"):
+        if filename.endswith(".md"):
+            loader = TextLoader(f"data/{filename}")
+            docs.extend(loader.load())
+
+    print(f"Loaded {len(docs)} total documents")
+
+    # Split into chunks
     print("Splitting documents...")
     splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000,
@@ -19,7 +39,7 @@ def ingest():
     chunks = splitter.split_documents(docs)
     print(f"Created {len(chunks)} chunks")
 
-    # 3. Embed and store
+    # Embed and store
     print("Embedding and storing in ChromaDB...")
     embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
     vectorstore = Chroma.from_documents(
@@ -31,4 +51,3 @@ def ingest():
 
 if __name__ == "__main__":
     ingest()
-
