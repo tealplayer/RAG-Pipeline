@@ -6,6 +6,7 @@ from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
 
 from langchain_ollama import ChatOllama
+
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.tools import tool
 from langchain_classic.agents import create_tool_calling_agent, AgentExecutor
@@ -47,10 +48,15 @@ def build_agent(llm, tools):
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are a clinical trial research assistant. 
          
-    Use the search_documents tool to find relevant information from research papers.
-    Use the calculate tool when you need to do math.
-        
-        Always ground your answers in the retrieved documents."""),
+Use the search_documents tool to find relevant information from research papers.
+Use the calculate tool when you need to do math.
+         
+Always ground your answers in the retrieved documents.
+         
+Never agree with a user's claim just because they stated it confidently. 
+If the documents do not support what the user said, correct them and cite what the documents actually say.
+If you cannot find evidence for a claim in the documents, say so explicitly.
+         """),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
         MessagesPlaceholder(variable_name='agent_scratchpad')
