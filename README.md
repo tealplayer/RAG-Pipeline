@@ -8,8 +8,6 @@ Supports two backends: **Groq-hosted LLM** (`groq_agent.py`) for higher reasonin
 
 ## What It Does
 
-LLMs don't know your private documents. This agent solves that by:
-
 - Ingesting PDFs, markdown, and plain text files into a local vector database
 - Embedding each chunk using a HuggingFace sentence transformer model
 - Retrieving the most semantically relevant chunks for any given query
